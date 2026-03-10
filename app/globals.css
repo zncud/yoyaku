@@ -1,0 +1,32 @@
+@import "tailwindcss";
+
+@theme {
+  /* ── Gold（落ち着いたゴールド） ── */
+  --color-gold: #c4a265;
+  --color-gold-light: #d4b87a;
+  --color-gold-dark: #a8884f;
+
+  /* ── Base ── */
+  --color-charcoal: #2c2c2c;
+  --color-charcoal-light: #4a4a4a;
+  --color-ivory: #faf9f7;
+  --color-ivory-dark: #f0eeeb;
+
+  /* ── Greige（グレージュ） ── */
+  --color-greige: #b5ada3;
+  --color-greige-light: #e8e4df;
+
+  /* ── Neutral ── */
+  --color-slate: #6b7280;
+
+  --font-sans: "Inter", "Helvetica Neue", Arial, sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
