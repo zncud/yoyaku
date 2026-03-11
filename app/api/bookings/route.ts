@@ -147,7 +147,7 @@ export async function POST(req: NextRequest) {
     .from("bookings")
     .select("id")
     .eq("staff_id", body.staff_id)
-    .eq("status", "reserved")
+    .in("status", ["pending", "reserved"])
     .lt("start_at", endAtUtc)
     .gt("end_at", startAtUtc)
     .limit(1);
@@ -166,7 +166,7 @@ export async function POST(req: NextRequest) {
       start_at: startAtUtc,
       end_at: endAtUtc,
       total_duration: totalDuration,
-      status: "reserved",
+      status: "pending", // 管理者が承認するまで pending
     })
     .select("id")
     .single();

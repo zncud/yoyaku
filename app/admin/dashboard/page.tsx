@@ -21,6 +21,7 @@ function formatTime(utc: string): string {
 }
 
 const STATUS_STYLE: Record<string, { label: string; cls: string }> = {
+  pending:   { label: "承認待ち",   cls: "bg-amber-50 text-amber-700 border border-amber-200" },
   reserved:  { label: "確定",       cls: "bg-gold/15 text-gold-dark border border-gold/30" },
   completed: { label: "完了",       cls: "bg-emerald-50 text-emerald-700 border border-emerald-200" },
   cancelled: { label: "キャンセル", cls: "bg-gray-100 text-gray-400 border border-gray-200" },
@@ -124,6 +125,7 @@ export default async function AdminDashboardPage() {
     };
   });
   const reservedCount = rows.filter((b) => b.status === "reserved").length;
+  const pendingCount = rows.filter((b) => b.status === "pending").length;
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
@@ -156,7 +158,7 @@ export default async function AdminDashboardPage() {
       <div className="mb-8 grid grid-cols-2 gap-4 sm:grid-cols-3">
         <SummaryCard label="本日の予約" value={String(rows.length)} unit="件" />
         <SummaryCard label="確定中" value={String(reservedCount)} unit="件" accent />
-        <SummaryCard label="日付" value={today.replace(/-/g, "/")} className="col-span-2 sm:col-span-1" />
+        <SummaryCard label="承認待ち" value={String(pendingCount)} unit="件" pending={pendingCount > 0} className="col-span-2 sm:col-span-1" />
       </div>
 
       {/* ── Today's Bookings ── */}
@@ -244,24 +246,26 @@ function SummaryCard({
   value,
   unit,
   accent,
+  pending,
   className,
 }: {
   label: string;
   value: string;
   unit?: string;
   accent?: boolean;
+  pending?: boolean;
   className?: string;
 }) {
   return (
     <div
-      className={`rounded-xl border border-greige-light bg-white p-4 ${className ?? ""}`}
+      className={`rounded-xl border bg-white p-4 ${pending ? "border-amber-200 bg-amber-50" : "border-greige-light"} ${className ?? ""}`}
     >
-      <p className="text-xs font-semibold tracking-wider text-greige uppercase">
+      <p className={`text-xs font-semibold tracking-wider uppercase ${pending ? "text-amber-600" : "text-greige"}`}>
         {label}
       </p>
       <p className="mt-1">
         <span
-          className={`text-2xl font-black ${accent ? "text-gold" : "text-charcoal"}`}
+          className={`text-2xl font-black ${pending ? "text-amber-700" : accent ? "text-gold" : "text-charcoal"}`}
         >
           {value}
         </span>

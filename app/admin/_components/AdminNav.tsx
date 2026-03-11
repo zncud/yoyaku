@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
+import LogoutButton from "@/app/components/LogoutButton";
 
 /* ─── PC用ナビ項目 ─── */
 const NAV_ITEMS = [
@@ -64,6 +65,16 @@ function ShopIcon({ active }: { active: boolean }) {
   );
 }
 
+function LogoutIcon() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--color-greige)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" />
+      <polyline points="16 17 21 12 16 7" />
+      <line x1="21" y1="12" x2="9" y2="12" />
+    </svg>
+  );
+}
+
 function GearIcon({ active }: { active: boolean }) {
   return (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={active ? "var(--color-gold)" : "var(--color-greige)"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -121,6 +132,7 @@ export default function AdminNav() {
                   </Link>
                 );
               })}
+              <LogoutButton className="shrink-0 rounded-lg px-3 py-1.5 text-xs font-medium tracking-wide text-red-400 transition-colors hover:bg-red-50 hover:text-red-500" />
             </div>
           </div>
         </div>
@@ -195,6 +207,12 @@ export default function AdminNav() {
           <TabLink href="/admin/settings" label="設定" active={pathname === "/admin/settings"}>
             <GearIcon active={pathname === "/admin/settings"} />
           </TabLink>
+
+          {/* ログアウト */}
+          <LogoutButton className="flex flex-col items-center justify-center gap-0.5 pt-2 pb-1 px-2">
+            <LogoutIcon />
+            <span className="text-[10px] font-medium text-greige">ログアウト</span>
+          </LogoutButton>
         </div>
       </nav>
     </>

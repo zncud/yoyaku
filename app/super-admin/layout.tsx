@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import SuperAdminMobileNav from "./_components/SuperAdminMobileNav";
+import LogoutButton from "@/app/components/LogoutButton";
 
 export const metadata = { title: "Super Admin | YOYAKU" };
 
@@ -48,6 +49,7 @@ export default async function SuperAdminLayout({
             <div className="flex items-center gap-1 overflow-x-auto ml-4 scrollbar-hide">
               <NavLink href="/super-admin" label="店舗一覧" />
               <NavLink href="/super-admin/create" label="店舗作成" />
+              <LogoutButton className="shrink-0 rounded-lg px-3 py-1.5 text-xs font-medium tracking-wide text-red-400 transition-colors hover:bg-red-50 hover:text-red-500" />
             </div>
           </div>
         </div>

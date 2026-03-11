@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import LogoutButton from "@/app/components/LogoutButton";
 
 function ListIcon({ active }: { active: boolean }) {
   return (
@@ -23,6 +24,16 @@ function PlusCircleIcon({ active }: { active: boolean }) {
   );
 }
 
+function LogoutIcon() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--color-greige)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" />
+      <polyline points="16 17 21 12 16 7" />
+      <line x1="21" y1="12" x2="9" y2="12" />
+    </svg>
+  );
+}
+
 export default function SuperAdminMobileNav() {
   const pathname = usePathname();
 
@@ -35,6 +46,10 @@ export default function SuperAdminMobileNav() {
         <TabLink href="/super-admin/create" label="店舗作成" active={pathname === "/super-admin/create"}>
           <PlusCircleIcon active={pathname === "/super-admin/create"} />
         </TabLink>
+        <LogoutButton className="flex flex-col items-center justify-center gap-0.5 pt-2 pb-1 px-4">
+          <LogoutIcon />
+          <span className="text-[10px] font-medium text-greige">ログアウト</span>
+        </LogoutButton>
       </div>
     </nav>
   );

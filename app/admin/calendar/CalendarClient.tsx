@@ -13,6 +13,7 @@ const JST_OFFSET_MS = 9 * 60 * 60 * 1000;
 const DAY_LABELS = ["日", "月", "火", "水", "木", "金", "土"];
 
 const STATUS_STYLE: Record<string, { label: string; bg: string; text: string }> = {
+  pending:   { label: "承認待ち",   bg: "bg-amber-100",     text: "text-amber-700" },
   reserved:  { label: "確定",       bg: "bg-gold/20",       text: "text-gold-dark" },
   completed: { label: "完了",       bg: "bg-emerald-100",   text: "text-emerald-700" },
   cancelled: { label: "キャンセル", bg: "bg-gray-100",      text: "text-gray-400" },
@@ -264,19 +265,15 @@ export default function CalendarClient({
   const goToNextDay = () => setSelectedDate((prev) => addDays(prev, 1));
   const goToToday = () => setSelectedDate(new Date());
 
-  /* ── 選択スタッフのデータをフィルタ ── */
+  /* ── 選択スタッフのデータをフィルタ ──
+   * 日付フィルタはAPIが既に処理済みなので、スタッフとstatusのみフィルタする
+   * （ブラウザのローカルタイムとUTC+9hトリックの混在バグを回避） */
   const staffBookings = bookings.filter((b) => {
-    const jst = toJST(b.start_at);
-    return (
-      formatJSTDate(jst) === selectedDateStr &&
-      b.staff_id === selectedStaffId &&
-      b.status !== "cancelled"
-    );
+    return b.staff_id === selectedStaffId && b.status !== "cancelled" && b.status !== "completed";
   });
 
   const staffShifts = shifts.filter((s) => {
-    const jst = toJST(s.start_at);
-    return formatJSTDate(jst) === selectedDateStr && s.staff_id === selectedStaffId;
+    return s.staff_id === selectedStaffId;
   });
 
   const isWorking = staffShifts.some((s) => s.type === "work");
@@ -342,6 +339,18 @@ export default function CalendarClient({
             className="ml-1 rounded-lg border border-greige-light px-3 py-2 text-xs font-medium text-slate transition-colors hover:bg-ivory-dark"
           >
             今日
+          </button>
+
+          {/* 更新ボタン */}
+          <button
+            onClick={fetchData}
+            disabled={isLoading}
+            className="ml-1 rounded-lg border border-greige-light px-3 py-2 text-xs font-medium text-slate transition-colors hover:bg-ivory-dark disabled:opacity-50"
+            title="最新データを取得"
+          >
+            <svg className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+            </svg>
           </button>
         </div>
 
@@ -511,6 +520,10 @@ export default function CalendarClient({
             setSelectedBooking(null);
             fetchData();
           }}
+          onApproved={() => {
+            setSelectedBooking(null);
+            fetchData();
+          }}
         />
       )}
     </div>
@@ -523,14 +536,38 @@ function BookingDetailPopup({
   storeId,
   onClose,
   onCancelled,
+  onApproved,
 }: {
   booking: CalendarBooking;
   storeId: string;
   onClose: () => void;
   onCancelled: () => void;
+  onApproved: () => void;
 }) {
   const [cancelling, setCancelling] = useState(false);
   const [confirmCancel, setConfirmCancel] = useState(false);
+  const [approving, setApproving] = useState(false);
+
+  const handleApprove = async () => {
+    setApproving(true);
+    try {
+      const res = await fetch("/api/admin/bookings/approve", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ store_id: storeId, booking_id: booking.id }),
+      });
+      if (res.ok) {
+        onApproved();
+      } else {
+        const data = await res.json();
+        alert(data.error || "承認に失敗しました");
+      }
+    } catch {
+      alert("通信エラーが発生しました");
+    } finally {
+      setApproving(false);
+    }
+  };
 
   const st = STATUS_STYLE[booking.status] ?? STATUS_STYLE.reserved;
   const customerName =
@@ -637,7 +674,9 @@ function BookingDetailPopup({
             </h2>
             <span
               className={`rounded-full px-3 py-0.5 text-xs font-bold border ${
-                booking.status === "reserved"
+                booking.status === "pending"
+                  ? "bg-amber-50 text-amber-700 border-amber-200"
+                  : booking.status === "reserved"
                   ? "bg-gold/15 text-gold-dark border-gold/30"
                   : booking.status === "completed"
                   ? "bg-emerald-50 text-emerald-700 border-emerald-200"
@@ -665,7 +704,18 @@ function BookingDetailPopup({
           </div>
 
           <div className="mt-5 space-y-2">
-            {booking.status === "reserved" && !confirmCancel && (
+            {/* 承認ボタン（pending のみ） */}
+            {booking.status === "pending" && (
+              <button
+                onClick={handleApprove}
+                disabled={approving}
+                className="w-full rounded-lg bg-gold py-2.5 text-sm font-bold text-white shadow-md shadow-gold/20 transition-colors hover:bg-gold-light disabled:opacity-50"
+              >
+                {approving ? "承認中..." : "この予約を承認する"}
+              </button>
+            )}
+            {/* キャンセルボタン（pending / reserved のみ） */}
+            {(booking.status === "pending" || booking.status === "reserved") && !confirmCancel && (
               <button
                 onClick={() => setConfirmCancel(true)}
                 className="w-full rounded-lg border border-red-200 bg-red-50 py-2.5 text-sm font-medium text-red-600 transition-colors hover:bg-red-100"

@@ -20,27 +20,29 @@ export default async function AdminLayout({
     redirect("/login?redirect=/admin");
   }
 
+  // ログインユーザーの店舗 → site_settings を取得
+  const { data: store } = await supabase
+    .from("stores")
+    .select("id")
+    .eq("owner_id", user.id)
+    .limit(1)
+    .maybeSingle();
+
+  // 店舗オーナーでない場合（顧客アカウント等）は弾く
+  if (!store) {
+    redirect("/");
+  }
+
   let themeStyle: React.CSSProperties | undefined;
+  {
+    const { data: siteSettings } = await supabase
+      .from("site_settings")
+      .select("theme_color")
+      .eq("store_id", store.id)
+      .single();
 
-  if (user) {
-    // ログインユーザーの店舗 → site_settings を取得
-    const { data: store } = await supabase
-      .from("stores")
-      .select("id")
-      .eq("owner_id", user.id)
-      .limit(1)
-      .maybeSingle();
-
-    if (store) {
-      const { data: siteSettings } = await supabase
-        .from("site_settings")
-        .select("theme_color")
-        .eq("store_id", store.id)
-        .single();
-
-      const primaryHex = (siteSettings?.theme_color as { primary?: string })?.primary;
-      themeStyle = buildThemeStyle(primaryHex);
-    }
+    const primaryHex = (siteSettings?.theme_color as { primary?: string })?.primary;
+    themeStyle = buildThemeStyle(primaryHex);
   }
 
   return (
