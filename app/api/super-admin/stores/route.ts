@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json();
-  const { name, slug, phone, address, owner_email } = body;
+  const { name, slug, phone, address, owner_email, owner_name } = body;
 
   if (!name || !slug || !owner_email) {
     return NextResponse.json(
@@ -91,7 +91,7 @@ export async function POST(req: NextRequest) {
       email: owner_email,
       password: randomPassword,
       email_confirm: true,
-      user_metadata: { full_name: name + " オーナー" },
+      user_metadata: { full_name: owner_name?.trim() || name + " オーナー" },
     });
 
     if (createErr || !newUser.user) {

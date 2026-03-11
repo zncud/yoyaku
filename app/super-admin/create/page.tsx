@@ -16,6 +16,7 @@ export default function CreateStorePage() {
     phone: "",
     address: "",
     owner_email: "",
+    owner_name: "",
   });
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
@@ -136,20 +137,37 @@ export default function CreateStorePage() {
             </div>
           </div>
 
-          <div className="border-t border-ivory-dark pt-5">
-            <label className="mb-1.5 block text-xs font-semibold tracking-wider text-greige uppercase">
-              オーナーメールアドレス <span className="text-red-400">*</span>
-            </label>
-            <input
-              type="email"
-              value={form.owner_email}
-              onChange={(e) => setForm({ ...form, owner_email: e.target.value })}
-              placeholder="owner@example.com"
-              className={INPUT_CLASS}
-            />
-            <p className="mt-1 text-[10px] text-greige">
-              既存アカウントがあればそのユーザーをオーナーに設定。なければ新規アカウントを作成します（初期パスワード: changeme123）
-            </p>
+          <div className="border-t border-ivory-dark pt-5 space-y-4">
+            <div>
+              <label className="mb-1.5 block text-xs font-semibold tracking-wider text-greige uppercase">
+                オーナーメールアドレス <span className="text-red-400">*</span>
+              </label>
+              <input
+                type="email"
+                value={form.owner_email}
+                onChange={(e) => setForm({ ...form, owner_email: e.target.value })}
+                placeholder="owner@example.com"
+                className={INPUT_CLASS}
+              />
+              <p className="mt-1 text-[10px] text-greige">
+                既存アカウントがあればそのユーザーをオーナーに設定。なければ新規アカウントを作成します
+              </p>
+            </div>
+            <div>
+              <label className="mb-1.5 block text-xs font-semibold tracking-wider text-greige uppercase">
+                オーナー名
+              </label>
+              <input
+                type="text"
+                value={form.owner_name}
+                onChange={(e) => setForm({ ...form, owner_name: e.target.value })}
+                placeholder="山田 太郎"
+                className={INPUT_CLASS}
+              />
+              <p className="mt-1 text-[10px] text-greige">
+                新規アカウント作成時のみ使用されます
+              </p>
+            </div>
           </div>
         </div>
 

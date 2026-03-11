@@ -206,17 +206,15 @@ export async function POST(req: NextRequest) {
   const bookingRow: Record<string, unknown> = {
     store_id: storeId,
     staff_id,
-    user_id: bookingUserId,
+    user_id: bookingUserId,   // guest の場合は null
     start_at: startAtUtc,
     end_at: endAtUtc,
     total_duration,
     status: "reserved",
+    guest_name: guest?.name ?? null,
+    guest_email: guest?.email ?? null,
+    guest_phone: guest?.phone || null,
   };
-  if (guest) {
-    bookingRow.guest_name = guest.name;
-    bookingRow.guest_email = guest.email;
-    bookingRow.guest_phone = guest.phone || null;
-  }
 
   const { data: booking, error: bookingErr } = await adminDb
     .from("bookings")

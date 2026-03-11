@@ -54,6 +54,7 @@ export async function GET(req: NextRequest) {
       .select(
         `
         id, staff_id, user_id, start_at, end_at, total_duration, status, created_at,
+        guest_name, guest_email, guest_phone,
         staffs ( name ),
         booking_menus ( menus ( name ) )
         `
@@ -101,33 +102,10 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  // guest カラムを別クエリで取得（カラム未作成でもエラーにならない）
-  let guestMap: Record<string, { guest_name: string | null; guest_email: string | null }> = {};
-  try {
-    const bookingIds = bookings.map((b: { id: string }) => b.id);
-    if (bookingIds.length > 0) {
-      const adminDb2 = createAdminClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!,
-      );
-      const { data: guestData } = await adminDb2
-        .from("bookings")
-        .select("id, guest_name, guest_email")
-        .in("id", bookingIds);
-      for (const g of guestData ?? []) {
-        guestMap[g.id] = { guest_name: g.guest_name, guest_email: g.guest_email };
-      }
-    }
-  } catch {
-    // カラム未作成時は無視
-  }
-
-  // profiles + guest 情報をマージ
-  const enrichedBookings = bookings.map((b: { id: string; user_id: string; [key: string]: unknown }) => ({
+  // profiles 情報をマージ
+  const enrichedBookings = bookings.map((b: { id: string; user_id: string | null; [key: string]: unknown }) => ({
     ...b,
-    profiles: profileMap[b.user_id] ?? null,
-    guest_name: guestMap[b.id]?.guest_name ?? null,
-    guest_email: guestMap[b.id]?.guest_email ?? null,
+    profiles: b.user_id ? (profileMap[b.user_id] ?? null) : null,
   }));
 
   return NextResponse.json({
